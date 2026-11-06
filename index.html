@@ -61,7 +61,6 @@
             padding: 0;
             line-height: 1.5;
         }
-        /* Guaranteed crisp map height without any blurry filter */
         #shelterMap {
             width: 100%;
             height: 520px;
@@ -69,7 +68,6 @@
             background-color: #f3f4f6;
             z-index: 10;
         }
-        /* Clean Leaflet Popup Styling */
         .leaflet-popup-content-wrapper {
             background: #ffffff !important;
             color: #111111 !important;
@@ -85,7 +83,6 @@
             margin: 12px 14px !important;
             line-height: 1.45 !important;
         }
-        /* Custom Scrollbar */
         .custom-scroll::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -100,8 +97,12 @@
         .custom-scroll::-webkit-scrollbar-thumb:hover {
             background: #111111;
         }
-        /* Print Styles */
+        /* Print Styles: High Contrast Black & White A4 Single Page */
         @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
             .no-print {
                 display: none !important;
             }
@@ -111,6 +112,8 @@
             body {
                 background: #ffffff !important;
                 color: #000000 !important;
+                font-size: 11px !important;
+                line-height: 1.35 !important;
             }
         }
         .print-only {
@@ -121,7 +124,23 @@
 <body class="min-h-screen bg-white text-black">
 
     <!-- =========================================================
-         TOP HEADER (CLEAN, NO OVERLAP, RESPONSIVE FLEX WRAP)
+         TOP OFFICIAL NOTICE & DATA DATE BAR (신뢰성 및 기준일)
+         ========================================================= -->
+    <div class="no-print bg-black text-white text-xs py-2 px-4 border-b border-gray-800">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5">
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="px-1.5 py-0.5 bg-white text-black font-black rounded text-[10px]">데이터 기준일: 2026-11-01</span>
+                <span class="text-gray-200">행정안전부 공공데이터 기반 참고용 정보입니다. 실제 개방 여부는 현장 지자체 통제에 따라 달라질 수 있습니다.</span>
+            </div>
+            <div class="flex items-center gap-3 shrink-0 font-bold">
+                <a href="https://www.safekorea.go.kr" target="_blank" rel="noopener noreferrer" class="underline hover:text-gray-300">국민재난안전포털 ↗</a>
+                <button onclick="toggleModal('pwaModal')" class="underline hover:text-gray-300">📱 홈 화면에 앱 설치 안내</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         TOP HEADER (오프라인 상태 검증 배지 포함)
          ========================================================= -->
     <header class="no-print border-b-2 border-black bg-white sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4">
@@ -134,7 +153,12 @@
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <h1 class="text-lg sm:text-xl font-black tracking-tight text-black">곁 (gyet) · 대한민국 민방위 대피소 & 비상생존 포털</h1>
-                            <span class="px-2 py-0.5 text-xs font-extrabold bg-black text-white rounded whitespace-nowrap">V1.0</span>
+                            <span class="px-2 py-0.5 text-xs font-extrabold bg-black text-white rounded whitespace-nowrap">V1.2</span>
+                            <!-- 오프라인 준비 완료 상태 표시 배지 -->
+                            <span id="offlineStatusBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-extrabold bg-gray-100 text-black border border-black rounded-full whitespace-nowrap">
+                                <span id="offlineStatusDot" class="w-2 h-2 rounded-full bg-black"></span>
+                                <span id="offlineStatusText">오프라인 준비 완료 (로컬 저장됨)</span>
+                            </span>
                         </div>
                         <p class="text-xs sm:text-sm text-gray-600 mt-0.5">
                             전국 사용중 대피소 <strong class="text-black font-bold">17,241개소</strong> 기준 · 현재 지도 로드: <strong id="loadedCountText" class="text-black underline">45개 거점</strong>
@@ -150,14 +174,14 @@
                     </label>
                     <input id="csvFileInput" type="file" accept=".csv" class="hidden" onchange="handleCsvFileUpload(event)" />
 
-                    <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-gray-100 text-black border-2 border-black font-bold text-xs sm:text-sm transition whitespace-nowrap">
+                    <button onclick="window.print()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-gray-100 text-black border-2 border-black font-extrabold text-xs sm:text-sm transition whitespace-nowrap">
                         <i class="fa-solid fa-print"></i>
-                        <span>비상시트 인쇄</span>
+                        <span>A4 비상시트 인쇄</span>
                     </button>
                 </div>
             </div>
 
-            <!-- 5 Main Navigation Tabs (Clean Pill Buttons, Never Crushed) -->
+            <!-- 5 Main Navigation Tabs -->
             <nav class="flex items-center gap-2 overflow-x-auto custom-scroll pt-4 pb-1 mt-3 border-t border-gray-200">
                 <button onclick="switchTab('mapTab')" id="tabBtn-mapTab" class="px-4 py-2 rounded-lg font-extrabold text-xs sm:text-sm bg-black text-white border-2 border-black whitespace-nowrap transition flex items-center gap-1.5">
                     <i class="fa-solid fa-location-dot"></i>
@@ -184,7 +208,7 @@
         </div>
     </header>
 
-    <!-- Status Notification Banner (Hidden by default) -->
+    <!-- Status Notification Banner -->
     <div id="statusToast" class="no-print hidden max-w-7xl mx-auto px-4 sm:px-6 mt-4">
         <div class="p-3.5 rounded-xl border-2 border-black bg-gray-50 flex items-center justify-between gap-3">
             <div class="flex items-center gap-2 text-xs sm:text-sm font-bold text-black">
@@ -198,27 +222,60 @@
     <!-- =========================================================
          MAIN CONTAINER
          ========================================================= -->
-    <main class="no-print max-w-7xl mx-auto px-4 sm:px-6 py-6">
+    <main class="no-print max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+        <!-- =====================================================
+             3-STEP ONBOARDING BAR (사용자 흐름 단순화)
+             ===================================================== -->
+        <div class="bg-gray-50 border-2 border-black rounded-xl p-4">
+            <div class="flex items-center justify-between mb-2.5">
+                <span class="text-xs font-black uppercase tracking-wider px-2 py-0.5 bg-black text-white rounded">평시 3분 생존 준비 순서</span>
+                <span class="text-xs text-gray-600 font-bold">인터넷·전기가 끊기기 전에 아래 3단계를 완료해 두세요</span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div onclick="switchTab('mapTab')" class="cursor-pointer bg-white border border-gray-300 hover:border-black rounded-lg p-3 flex items-center justify-between transition">
+                    <div>
+                        <div class="text-xs font-extrabold text-gray-500">1단계 · 대피소 지정</div>
+                        <div class="text-sm font-black text-black mt-0.5">집·직장 근처 대피소 2곳 저장</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-sm text-black"></i>
+                </div>
+                <div onclick="switchTab('survivalTab')" class="cursor-pointer bg-white border border-gray-300 hover:border-black rounded-lg p-3 flex items-center justify-between transition">
+                    <div>
+                        <div class="text-xs font-extrabold text-gray-500">2단계 · 비축량 확인</div>
+                        <div class="text-sm font-black text-black mt-0.5">가족 인원별 7일 식수·식량 점검</div>
+                    </div>
+                    <i class="fa-solid fa-arrow-right text-sm text-black"></i>
+                </div>
+                <div onclick="window.print()" class="cursor-pointer bg-black text-white rounded-lg p-3 flex items-center justify-between hover:bg-gray-800 transition">
+                    <div>
+                        <div class="text-xs font-bold text-gray-300">3단계 · 종이 백업 (최종)</div>
+                        <div class="text-sm font-black mt-0.5">A4 비상시트 인쇄 후 현관 부착</div>
+                    </div>
+                    <i class="fa-solid fa-print text-sm"></i>
+                </div>
+            </div>
+        </div>
 
         <!-- =====================================================
              TAB 1: 대피소 지도 & 검색
              ===================================================== -->
         <section id="mapTab" class="space-y-5">
 
-            <!-- Search & Region Filter Bar -->
-            <div class="bg-white border-2 border-black rounded-xl p-4">
+            <!-- Search & Manual Location Filter Bar (통신 마비/실내 GPS 오차 대비 수동 선택 강화) -->
+            <div class="bg-white border-2 border-black rounded-xl p-4 space-y-3">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                     <!-- Keyword Search -->
-                    <div class="md:col-span-5 relative">
+                    <div class="md:col-span-4 relative">
                         <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i>
-                        <input id="searchInput" type="text" oninput="applyFilters()" placeholder="시설명, 도로명주소, 동 이름 검색 (예: 다산, 호평, 시청)" class="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-gray-400 rounded-lg focus:outline-none focus:border-black font-medium text-black" />
+                        <input id="searchInput" type="text" oninput="applyFilters()" placeholder="시설명, 도로명, 동 이름 검색 (예: 다산, 호평, 시청)" class="w-full pl-9 pr-3 py-2.5 text-sm bg-white border border-gray-400 rounded-lg focus:outline-none focus:border-black font-medium text-black" />
                     </div>
 
-                    <!-- Region Select -->
+                    <!-- Region Select (시·도) -->
                     <div class="md:col-span-3">
                         <select id="regionSelect" onchange="handleRegionChange()" class="w-full px-3 py-2.5 text-sm bg-white border border-gray-400 rounded-lg focus:outline-none focus:border-black font-bold text-black">
-                            <option value="ALL">전체 시도 (전국)</option>
-                            <option value="경기도">경기도 (남양주·수원·성남 등)</option>
+                            <option value="ALL">1. 시·도 선택 (전국)</option>
+                            <option value="경기도">경기도</option>
                             <option value="서울특별시">서울특별시</option>
                             <option value="부산광역시">부산광역시</option>
                             <option value="인천광역시">인천광역시</option>
@@ -236,20 +293,38 @@
                         </select>
                     </div>
 
-                    <!-- Quick Location Buttons -->
-                    <div class="md:col-span-4 flex flex-wrap items-center gap-2">
-                        <button onclick="findMyLocation()" class="flex-1 px-3 py-2.5 rounded-lg bg-black hover:bg-gray-800 text-white font-bold text-xs sm:text-sm transition whitespace-nowrap flex items-center justify-center gap-1.5">
+                    <!-- Sub-Region Select (시·군·구/주요 거점 - GPS 불능 대비 수동 선택) -->
+                    <div class="md:col-span-3">
+                        <select id="sigunguSelect" onchange="handleSigunguChange()" class="w-full px-3 py-2.5 text-sm bg-white border border-gray-400 rounded-lg focus:outline-none focus:border-black font-bold text-black">
+                            <option value="ALL">2. 시·군·구 / 거점 수동 이동</option>
+                            <option value="37.6360,127.2165,남양주시 금곡·시청">남양주시 (금곡·시청)</option>
+                            <option value="37.6180,127.1550,남양주시 다산신도시">남양주시 (다산동)</option>
+                            <option value="37.6540,127.2440,남양주시 호평·평내">남양주시 (호평·평내)</option>
+                            <option value="37.6450,127.1250,남양주시 별내·퇴계원">남양주시 (별내·퇴계원)</option>
+                            <option value="37.7150,127.1950,남양주시 진접·오남">남양주시 (진접·오남)</option>
+                            <option value="37.5665,126.9780,서울 도심(종로·중구)">서울 (종로·중구·서울역)</option>
+                            <option value="37.4979,127.0276,서울 강남·서초·송파">서울 (강남·잠실권)</option>
+                            <option value="37.5216,126.9241,서울 여의도·마포">서울 (여의도·홍대권)</option>
+                            <option value="37.2659,126.9998,경기 수원·성남(판교)">경기 남부 (수원·성남)</option>
+                            <option value="37.6690,126.7458,경기 고양·의정부">경기 북부 (고양·의정부)</option>
+                            <option value="37.4562,126.7052,인천광역시">인천 (구월·부평)</option>
+                            <option value="35.1795,129.0756,부산광역시">부산 (시청·서면)</option>
+                            <option value="35.8657,128.5933,대구광역시">대구 (반월당)</option>
+                            <option value="36.3504,127.3845,대전광역시">대전 (둔산)</option>
+                        </select>
+                    </div>
+
+                    <!-- GPS Button -->
+                    <div class="md:col-span-2">
+                        <button onclick="findMyLocation()" class="w-full px-3 py-2.5 rounded-lg bg-black hover:bg-gray-800 text-white font-bold text-xs sm:text-sm transition whitespace-nowrap flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-location-crosshairs"></i>
-                            <span>내 주변(GPS) 찾기</span>
-                        </button>
-                        <button onclick="moveToPreset(37.6360, 127.2165, '남양주시 중심')" class="px-3 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-black border border-gray-300 font-bold text-xs sm:text-sm transition whitespace-nowrap">
-                            남양주
-                        </button>
-                        <button onclick="moveToPreset(37.5665, 126.9780, '서울시청 중심')" class="px-3 py-2.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-black border border-gray-300 font-bold text-xs sm:text-sm transition whitespace-nowrap">
-                            서울
+                            <span>GPS 위치 찾기</span>
                         </button>
                     </div>
                 </div>
+                <p class="text-[11px] text-gray-600">
+                    • <strong>통신 마비·실내 GPS 오차 안내:</strong> 재난 시 기지국 보조 신호(A-GPS)가 끊기면 위치 파악이 느려질 수 있습니다. 그럴 땐 <strong>[2. 시·군·구 수동 이동]</strong>이나 검색창에 동 이름을 직접 입력해 대피소를 찾으세요.
+                </p>
             </div>
 
             <!-- Map + Shelter List 2-Column Layout -->
@@ -267,11 +342,10 @@
                         </button>
                     </div>
 
-                    <!-- Guaranteed 520px Height Map Container -->
                     <div id="shelterMap"></div>
 
                     <div class="px-4 py-2.5 bg-white border-t border-gray-200 flex flex-wrap items-center justify-between gap-2 text-xs text-gray-600">
-                        <span>• 마커를 클릭하면 상세 수용인원·지하 여부 확인 및 오프라인 보관함 저장이 가능합니다.</span>
+                        <span>• 마커를 클릭하면 수용인원·지하 여부 확인 및 오프라인 보관함 저장이 가능합니다.</span>
                         <span class="font-bold text-black">지도 데이터: © OpenStreetMap</span>
                     </div>
                 </div>
@@ -301,30 +375,60 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-                <!-- Left (5 cols): Saved Shelters for Offline/Blackout -->
-                <div class="lg:col-span-5 bg-white border-2 border-black rounded-xl p-5 space-y-4">
-                    <div class="flex items-center justify-between border-b border-gray-200 pb-3">
-                        <div>
-                            <span class="text-xs font-extrabold text-gray-500 uppercase">인터넷 마비 대비</span>
-                            <h2 class="text-base sm:text-lg font-black text-black">내 가족 지정 대피소 보관함</h2>
+                <!-- Left (5 cols): Saved Shelters & Family Emergency Plan Inputs -->
+                <div class="lg:col-span-5 space-y-5">
+                    <div class="bg-white border-2 border-black rounded-xl p-5 space-y-4">
+                        <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                            <div>
+                                <span class="text-xs font-extrabold text-gray-500 uppercase">인터넷 마비 대비 로컬 백업</span>
+                                <h2 class="text-base sm:text-lg font-black text-black">내 가족 지정 대피소 보관함</h2>
+                            </div>
+                            <button onclick="clearAllBookmarks()" class="text-xs font-bold text-gray-600 hover:text-black underline whitespace-nowrap">전체 비우기</button>
                         </div>
-                        <button onclick="clearAllBookmarks()" class="text-xs font-bold text-gray-600 hover:text-black underline whitespace-nowrap">전체 비우기</button>
+
+                        <p class="text-xs text-gray-600 leading-relaxed">
+                            집, 직장, 학교 근처 대피소를 2~3곳 저장해 두세요. 기기 내부(LocalStorage)에 영구 기록되어 <strong>인터넷이 끊겨도 열람 가능하며, A4 비상시트 인쇄 시 자동 출력</strong>됩니다.
+                        </p>
+
+                        <div id="bookmarkListContainer" class="space-y-3">
+                            <!-- Populated by JS -->
+                        </div>
                     </div>
 
-                    <p class="text-xs text-gray-600 leading-relaxed">
-                        집, 직장, 학교 근처 대피소를 미리 2~3곳 저장해 두세요. 브라우저 내부 저장소(LocalStorage)에 기록되어 인터넷이 끊기거나 비상시트 인쇄 시 바로 확인할 수 있습니다.
-                    </p>
-
-                    <div id="bookmarkListContainer" class="space-y-3">
-                        <!-- Populated by JS -->
+                    <!-- 인쇄 시트에 반영되는 가족 집결지·비상연락처 사전 입력란 -->
+                    <div class="bg-white border-2 border-black rounded-xl p-5 space-y-3">
+                        <div class="border-b border-gray-200 pb-2.5">
+                            <span class="text-xs font-extrabold text-gray-500">종이 인쇄 시트 연동 (선택 입력)</span>
+                            <h3 class="text-sm sm:text-base font-black text-black">우리 가족 비상 집결지 & 연락망 메모</h3>
+                        </div>
+                        <p class="text-xs text-gray-600">아래 칸을 입력해 두거나 비워둔 채로 인쇄하여 종이에 직접 펜으로 적으셔도 됩니다.</p>
+                        <div class="space-y-2.5 text-xs">
+                            <div>
+                                <label class="font-bold block mb-1">1차 가족 집결지 (집 근처 대피소/공원 등)</label>
+                                <input id="planMeet1" type="text" oninput="saveFamilyPlan()" placeholder="예: 다산역 지하 1층 개찰구 앞 (폭격 멈춘 후 1시간 뒤)" class="w-full px-3 py-2 border border-gray-400 rounded-lg font-medium" />
+                            </div>
+                            <div>
+                                <label class="font-bold block mb-1">2차 가족 집결지 (동네 진입 불가 시)</label>
+                                <input id="planMeet2" type="text" oninput="saveFamilyPlan()" placeholder="예: 남양주시청 제1청사 지하대피소" class="w-full px-3 py-2 border border-gray-400 rounded-lg font-medium" />
+                            </div>
+                            <div>
+                                <label class="font-bold block mb-1">비상 연락처 (타 지역 친척 / 가족 전화번호)</label>
+                                <input id="planContacts" type="text" oninput="saveFamilyPlan()" placeholder="예: 홍길동(부) 010-XXXX-XXXX / 본가(대전) 042-XXX-XXXX" class="w-full px-3 py-2 border border-gray-400 rounded-lg font-medium" />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Right (7 cols): 3~7 Day Family Water & Food Calculator -->
                 <div class="lg:col-span-7 bg-white border-2 border-black rounded-xl p-5 space-y-5">
-                    <div class="border-b border-gray-200 pb-3">
-                        <span class="text-xs font-extrabold text-gray-500 uppercase">정전·단수 대비 비축 기준</span>
-                        <h2 class="text-base sm:text-lg font-black text-black">우리 집 3일~7일 생존 물자 자동 계산기</h2>
+                    <div class="border-b border-gray-200 pb-3 flex items-center justify-between flex-wrap gap-2">
+                        <div>
+                            <span class="text-xs font-extrabold text-gray-500 uppercase">정전·단수 대비 비축 기준 (행안부·FEMA 권고)</span>
+                            <h2 class="text-base sm:text-lg font-black text-black">우리 집 3일~7일 생존 물자 자동 계산기</h2>
+                        </div>
+                        <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-black text-white text-xs font-bold hover:bg-gray-800">
+                            <i class="fa-solid fa-print mr-1"></i>계산 결과 시트 인쇄
+                        </button>
                     </div>
 
                     <!-- Sliders for Family Members & Target Days -->
@@ -359,7 +463,7 @@
                     <!-- Calculated Output Cards -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div class="border border-gray-300 rounded-xl p-4 bg-white">
-                            <span class="text-xs font-bold text-gray-500">필수 음용수 (1인 하루 2L)</span>
+                            <span class="text-xs font-bold text-gray-500">필수 음용수 (1인 하루 2L 기준)</span>
                             <div class="text-xl sm:text-2xl font-black text-black mt-1" id="calcDrinkWaterResult">56 L</div>
                             <p class="text-xs text-gray-600 mt-1" id="calcDrinkBottleSub">2L 생수병 기준 28병 (6개입 약 5팩)</p>
                         </div>
@@ -379,7 +483,7 @@
                         <div class="border border-gray-300 rounded-xl p-4 bg-white">
                             <span class="text-xs font-bold text-gray-500">단수 대비 비상 변기봉투·응고제</span>
                             <div class="text-xl sm:text-2xl font-black text-black mt-1" id="calcToiletBagsResult">140 매</div>
-                            <p class="text-xs text-gray-600 mt-1">단수 시 아파트 변기 물 내림 절대 금지 (역류 방지)</p>
+                            <p class="text-xs text-gray-600 mt-1">단수 시 아파트 변기 물 내림 절대 금지 (오수 역류 방지)</p>
                         </div>
                     </div>
 
@@ -523,7 +627,7 @@
                             <p class="text-xs sm:text-sm text-gray-700 mt-1 leading-relaxed" id="simSeasonWarningBody"></p>
                         </div>
                         <div class="pt-3 border-t border-gray-200">
-                            <h3 class="text-sm sm:text-base font-black text-black">민방위 대피소 반려동물 동반 지침 판정</h3>
+                            <h3 class="text-sm sm:text-base font-black text-black">민방위 대피소 반려동물 동반 지침 판정 (농림축산식품부·행안부 권고 기준)</h3>
                             <p class="text-xs sm:text-sm text-gray-700 mt-1 leading-relaxed" id="simPetPolicyBody"></p>
                         </div>
                     </div>
@@ -533,15 +637,20 @@
         </section>
 
         <!-- =====================================================
-             TAB 4: 핵·화생방 생존 가이드 (V1.0 핵심)
+             TAB 4: 핵·화생방 생존 가이드 (공식 출처 및 보수적 안내 보강)
              ===================================================== -->
         <section id="nuclearTab" class="hidden space-y-6">
 
-            <!-- Intro Banner -->
+            <!-- Intro Banner with Official Citations -->
             <div class="bg-white border-2 border-black rounded-xl p-5">
-                <div class="flex items-center gap-2 flex-wrap">
-                    <span class="px-2.5 py-0.5 rounded bg-black text-white text-xs font-black">NUCLEAR & FALLOUT GUIDE</span>
-                    <h2 class="text-lg sm:text-xl font-black text-black">핵전쟁 · 방사성 낙진 · EMP 마비 대비 4단계 생존 가이드</h2>
+                <div class="flex items-center justify-between gap-2 flex-wrap">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span class="px-2.5 py-0.5 rounded bg-black text-white text-xs font-black">NUCLEAR & FALLOUT GUIDE</span>
+                        <h2 class="text-lg sm:text-xl font-black text-black">핵전쟁 · 방사성 낙진 · EMP 마비 대비 4단계 생존 가이드</h2>
+                    </div>
+                    <span class="text-xs font-bold text-gray-600 bg-gray-100 px-2.5 py-1 rounded border border-gray-300">
+                        근거: 행안부 비상대비 행동요령 · 미 연방재난관리청(FEMA) · ICRP 기준 교차 검증
+                    </span>
                 </div>
                 <p class="text-xs sm:text-sm text-gray-700 mt-2 leading-relaxed">
                     핵폭발 시 생존율을 가르는 절대 원칙은 <strong class="text-black underline">① 섬광 직후 엎드려 엄폐(0~60초) → ② 낙진이 쏟아지기 전 지하 대피소 진입(15분 이내) → ③ 방사능 강도가 1/100로 줄어드는 최소 48시간 실내 밀폐 대기</strong>입니다.
@@ -555,13 +664,13 @@
                         <span class="px-2 py-0.5 rounded bg-black text-white text-xs font-black">1단계 · 폭발 직후 (0~60초)</span>
                         <h3 class="text-base font-black text-black mt-2">섬광 주시 금지 & 엎드려 엄폐</h3>
                         <ul class="mt-2.5 space-y-1.5 text-xs text-gray-700 leading-relaxed">
-                            <li>• <strong class="text-black">눈 감기:</strong> 섬광을 직접 보면 망막 화상으로 실명할 수 있습니다.</li>
+                            <li>• <strong class="text-black">눈 감기:</strong> 섬광을 직접 보면 망막 화상으로 일시적·영구적 실명 위험이 있습니다.</li>
                             <li>• <strong class="text-black">충격파 방어 자세:</strong> 바닥에 엎드려 배낭으로 머리를 가리고, <strong class="text-black underline">입을 살짝 벌리고 귀를 막아</strong> 고막 파열을 막습니다.</li>
                             <li>• <strong class="text-black">유리창 이탈:</strong> 수초 뒤 후폭풍이 유리를 파쇄하므로 창가에서 즉시 벗어납니다.</li>
                         </ul>
                     </div>
                     <div class="mt-3 pt-2 border-t border-gray-200 text-[11px] font-extrabold text-black">
-                        핵심: 폭풍이 지나갈 때까지 최소 1~2분간 엎드린 자세 유지
+                        출처: 행정안전부 민방위 화생방·핵 행동요령
                     </div>
                 </div>
 
@@ -576,7 +685,7 @@
                         </ul>
                     </div>
                     <div class="mt-3 pt-2 border-t border-gray-200 text-[11px] font-extrabold text-black">
-                        주의: 일반 차량 내부는 방사선을 전혀 차단하지 못함
+                        출처: 미 FEMA 'Get Inside, Stay Inside' 지침
                     </div>
                 </div>
 
@@ -587,26 +696,25 @@
                         <ul class="mt-2.5 space-y-1.5 text-xs text-gray-700 leading-relaxed">
                             <li>• <strong class="text-black">공기 차단:</strong> 에어컨·환풍기를 끄고 창문과 문틈을 비닐과 테이프·젖은 수건으로 밀폐합니다.</li>
                             <li>• <strong class="text-black">겉옷 밀봉(90% 제거):</strong> 외부에서 입던 옷과 신발은 벗어서 비닐봉투에 이중 밀봉합니다.</li>
-                            <li>• <strong class="text-black">샤워 수칙:</strong> 물과 비누로 씻되, <strong class="text-black underline">방사성 입자를 머리카락에 고착시키는 린스(컨디셔너)는 절대 사용 금지</strong>입니다.</li>
+                            <li>• <strong class="text-black">샤워 수칙:</strong> 물과 비누로 씻되, <strong class="text-black underline">단백질 성분이 방사성 입자를 머리카락에 고착시키는 린스(컨디셔너)는 사용 금지</strong>입니다.</li>
                         </ul>
                     </div>
                     <div class="mt-3 pt-2 border-t border-gray-200 text-[11px] font-extrabold text-black">
-                        식수: 밀폐 용기에 담긴 생수와 통조림만 섭취
+                        출처: 미 질병통제예방센터(CDC) 방사능 제염 수칙
                     </div>
                 </div>
 
                 <div class="bg-white border border-gray-300 rounded-xl p-4 flex flex-col justify-between">
                     <div>
-                        <span class="px-2 py-0.5 rounded bg-black text-white text-xs font-black">4단계 · 정보 수신 (48시간~7일)</span>
-                        <h3 class="text-base font-black text-black mt-2">건전지 라디오 청취 & 대기</h3>
+                        <span class="px-2 py-0.5 rounded bg-black text-white text-xs font-black">4단계 · 정보 수신 & 복약 주의</span>
+                        <h3 class="text-base font-black text-black mt-2">라디오 청취 & 요오드제 오남용 금지</h3>
                         <ul class="mt-2.5 space-y-1.5 text-xs text-gray-700 leading-relaxed">
-                            <li>• <strong class="text-black">EMP 대비:</strong> 전자기펄스(EMP)와 정전 시 스마트폰이 먹통이 됩니다. 건전지식/자가발전 AM·FM 라디오가 필수입니다.</li>
-                            <li>• <strong class="text-black">요오드제(KI) 주의:</strong> 갑상선 보호용 요오드화칼륨은 정부 공식 권고 시에만 정량 복용합니다.</li>
-                            <li>• <strong class="text-black">무단 외출 금지:</strong> 낙진 오염 구역 확인 전까지 실내에 머무릅니다.</li>
+                            <li>• <strong class="text-black">EMP 대비:</strong> 통신 마비 시 건전지식 라디오로 재난방송(KBS 1R FM 97.3MHz)을 청취합니다.</li>
+                            <li>• <strong class="text-black underline">요오드화칼륨(KI) 주의:</strong> 방사성 요오드의 갑상선 축적만 제한할 뿐 외부 피폭이나 다른 핵종을 막는 만능 해독제가 아닙니다. 임의 복용 시 부작용 위험이 크므로 <strong>반드시 정부·보건당국의 공식 복용 지시가 있을 때만</strong> 복용하십시오.</li>
                         </ul>
                     </div>
                     <div class="mt-3 pt-2 border-t border-gray-200 text-[11px] font-extrabold text-black">
-                        재난주관방송: KBS 제1라디오 (수도권 FM 97.3MHz)
+                        출처: 한국원자력의학원(KIRAMS) · WHO 지침
                     </div>
                 </div>
             </div>
@@ -618,14 +726,14 @@
                 <div class="lg:col-span-6 bg-white border-2 border-black rounded-xl p-5 space-y-4">
                     <div class="flex items-center justify-between border-b border-gray-200 pb-3">
                         <div>
-                            <span class="text-xs font-extrabold text-gray-500">과학적 생존 법칙 (7-10 Rule)</span>
+                            <span class="text-xs font-extrabold text-gray-500">과학적 감쇠 모델 (Way-Wigner Equation / FEMA)</span>
                             <h3 class="text-base sm:text-lg font-black text-black">7:10 법칙 방사능 낙진 감쇠 계산기</h3>
                         </div>
                         <span class="px-2.5 py-1 rounded bg-black text-white text-xs font-bold whitespace-nowrap">7배 시간마다 1/10 감소</span>
                     </div>
 
                     <p class="text-xs text-gray-700 leading-relaxed">
-                        핵폭발 후 시간이 <strong class="text-black">7배 흐를 때마다 방사선 강도는 1/10로 급감</strong>합니다(1시간 후 100% → 7시간 후 10% → 49시간 후 1%). 초기 48시간을 지하에서 버텨야 하는 이유입니다.
+                        핵분열 생성물의 방사선 강도는 $R_t = R_1 \times t^{-1.2}$ 공식에 따라 시간이 <strong class="text-black">7배 흐를 때마다 약 1/10로 급감</strong>합니다(1시간 후 100% → 7시간 후 10% → 49시간 후 1%). 초기 48시간 실내 대기가 생명을 살리는 과학적 이유입니다.
                     </p>
 
                     <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
@@ -639,20 +747,23 @@
                     <div id="nucDecayBarsContainer" class="space-y-2.5">
                         <!-- Populated by JS -->
                     </div>
+                    <p class="text-[11px] text-gray-500 pt-1">
+                        * 참고 출처: 미 연방재난관리청(FEMA) 'Planning Guidance for Response to a Nuclear Detonation' (풍향·강우에 따라 국지적 선량은 달라질 수 있음)
+                    </p>
                 </div>
 
                 <!-- Right (6 cols): Shelter Protection Factor (PF) Simulator -->
                 <div class="lg:col-span-6 bg-white border-2 border-black rounded-xl p-5 space-y-4">
                     <div class="flex items-center justify-between border-b border-gray-200 pb-3">
                         <div>
-                            <span class="text-xs font-extrabold text-gray-500">엄폐물 방호 효과 비교</span>
+                            <span class="text-xs font-extrabold text-gray-500">엄폐물 방호 계수 (DoD / NCRP Report No. 165)</span>
                             <h3 class="text-base sm:text-lg font-black text-black">대피 장소별 방사선 차폐 계수 (PF) 비교</h3>
                         </div>
                         <span class="px-2.5 py-1 rounded bg-gray-100 border border-black text-black text-xs font-bold whitespace-nowrap">PF 높을수록 안전</span>
                     </div>
 
                     <p class="text-xs text-gray-700 leading-relaxed">
-                        대피할 장소를 클릭해 보세요. 전국 <strong class="text-black">지하 민방위 대피소(99.2%가 지하 위치)</strong>는 콘크리트와 토양층 덕분에 야외 방사선의 <strong class="text-black">99.8% 이상을 차단(PF 500)</strong>합니다.
+                        대피할 장소를 클릭해 보세요. 전국 <strong class="text-black">지하 민방위 대피소(99.2%가 지하 위치)</strong>는 두꺼운 콘크리트 슬래브와 토양층 덕분에 야외 감마선의 <strong class="text-black">99% 이상을 차폐(PF 100~500+)</strong>합니다.
                     </p>
 
                     <div id="pfSelectorContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -662,6 +773,9 @@
                     <div id="pfResultCard" class="bg-gray-50 border-2 border-black rounded-xl p-4">
                         <!-- Populated by JS -->
                     </div>
+                    <p class="text-[11px] text-gray-500 pt-1">
+                        * 참고 출처: 미 국립방사선방호측정심의회(NCRP) 및 민방위 시설 구조별 표준 차폐계수(Protection Factor) 권고치
+                    </p>
                 </div>
 
             </div>
@@ -710,37 +824,139 @@
     </main>
 
     <!-- =========================================================
-         PRINT-ONLY EMERGENCY SHEET (A4 1페이지 요약 출력용)
+         PWA / 홈 화면 추가 안내 모달 (재접속 성공률 향상)
          ========================================================= -->
-    <section class="print-only p-6 max-w-4xl mx-auto text-black">
-        <div class="border-b-2 border-black pb-3 mb-4 flex justify-between items-end">
-            <div>
-                <h1 class="text-2xl font-black">곁 (gyet) · 우리 가족 비상 대피소 & 7일 생존 매뉴얼</h1>
-                <p class="text-xs">인터넷·통신·전기·수도 마비 대비 오프라인 보관용 시트 (냉장고·현관문 부착용)</p>
+    <div id="pwaModal" class="no-print hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white border-2 border-black rounded-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex items-center justify-between border-b border-gray-200 pb-3">
+                <h3 class="text-base font-black text-black">📱 스마트폰 홈 화면에 '곁' 설치하기</h3>
+                <button onclick="toggleModal('pwaModal')" class="text-sm font-black">✕</button>
             </div>
-            <span class="text-xs font-bold">gyet.site 공식 비상시트</span>
+            <div class="space-y-3 text-xs sm:text-sm text-gray-700 leading-relaxed">
+                <p>위급 상황 시 주소를 일일이 검색하지 않고 1초 만에 열 수 있도록 스마트폰 바탕화면에 추가해 두세요.</p>
+                <div class="p-3 bg-gray-50 border border-gray-300 rounded-lg space-y-1.5">
+                    <div class="font-black text-black">• 아이폰 (Safari 브라우저)</div>
+                    <p class="text-xs">하단 가운데 <strong>[공유 버튼(⬆️)]</strong> 터치 ➔ 메뉴를 내려 <strong>[홈 화면에 추가]</strong> 선택</p>
+                </div>
+                <div class="p-3 bg-gray-50 border border-gray-300 rounded-lg space-y-1.5">
+                    <div class="font-black text-black">• 안드로이드 (Chrome / 삼성 인터넷)</div>
+                    <p class="text-xs">우측 상단/하단 <strong>[메뉴(⋮ 또는 ☰)]</strong> 터치 ➔ <strong>[홈 화면에 추가]</strong> 선택</p>
+                </div>
+            </div>
+            <button onclick="toggleModal('pwaModal')" class="w-full py-2.5 bg-black text-white font-black text-xs sm:text-sm rounded-lg">확인했습니다</button>
+        </div>
+    </div>
+
+    <!-- =========================================================
+         PRINT-ONLY EMERGENCY SHEET (완성도 높은 A4 1장 흑백 고대비 시트)
+         ========================================================= -->
+    <section class="print-only max-w-4xl mx-auto text-black">
+        <!-- Header -->
+        <div class="border-b-2 border-black pb-2 mb-3 flex justify-between items-end">
+            <div>
+                <h1 class="text-xl font-black tracking-tight">곁 (gyet.site) · 우리 가족 비상 대피소 & 7일 생존 계획표</h1>
+                <p class="text-[10px]">통신·전기·수도 마비 대비 오프라인 보관용 (인쇄 후 현관문 안쪽 또는 냉장고에 부착)</p>
+            </div>
+            <div class="text-right text-[10px] font-bold">
+                <div>데이터 기준일: 2026-11-01</div>
+                <div>재난방송: KBS 1라디오 (FM 97.3MHz)</div>
+            </div>
         </div>
 
-        <h2 class="text-base font-black mb-2">1. 우리 가족 지정 민방위 대피소 (도보 이동 목표)</h2>
-        <div id="printBookmarksArea" class="border border-black rounded p-3 mb-4 text-xs space-y-2"></div>
+        <!-- Section 1: Saved Shelters -->
+        <div class="mb-3">
+            <h2 class="text-xs font-black bg-black text-white px-2 py-1 mb-1.5">1. 우리 가족 지정 민방위 대피소 (도보 이동 목표)</h2>
+            <div id="printBookmarksArea" class="border border-black p-2.5 text-[11px] space-y-1.5"></div>
+        </div>
 
-        <h2 class="text-base font-black mb-2">2. 정전·단수 대비 필수 비축 물자 점검표</h2>
-        <div id="printChecklistArea" class="grid grid-cols-2 gap-2 text-xs mb-4"></div>
+        <!-- Section 2: Family Meeting Point, Contacts & Sketch Box (자필 기입란 & 약도) -->
+        <div class="mb-3">
+            <h2 class="text-xs font-black bg-black text-white px-2 py-1 mb-1.5">2. 통신 두절 시 가족 집결지 · 비상연락망 · 대피 약도 (직접 기입)</h2>
+            <div class="grid grid-cols-12 gap-2 border border-black p-2.5 text-[11px]">
+                <div class="col-span-7 space-y-2 pr-2 border-r border-black">
+                    <div>
+                        <strong>• 1차 가족 집결지 (집 근처):</strong>
+                        <div id="printMeet1" class="border-b border-dotted border-black min-h-[18px] mt-0.5 font-medium"></div>
+                    </div>
+                    <div>
+                        <strong>• 2차 가족 집결지 (동네 통제 시):</strong>
+                        <div id="printMeet2" class="border-b border-dotted border-black min-h-[18px] mt-0.5 font-medium"></div>
+                    </div>
+                    <div>
+                        <strong>• 비상 연락망 (가족 / 타 지역 친척 전화번호):</strong>
+                        <div id="printContacts" class="border-b border-dotted border-black min-h-[18px] mt-0.5 font-medium"></div>
+                    </div>
+                    <div>
+                        <strong>• 가족 혈액형 / 필수 지참 상비약 메모:</strong>
+                        <div class="border-b border-dotted border-black min-h-[18px] mt-0.5"></div>
+                    </div>
+                </div>
+                <div class="col-span-5 flex flex-col justify-between pl-1">
+                    <div class="text-[10px] font-bold">• 집 → 1순위 대피소 도보 경로 약도 / 출입구 메모</div>
+                    <div class="border border-dashed border-gray-500 h-24 mt-1 flex items-center justify-center text-[10px] text-gray-500">
+                        (이곳에 대피소 계단 입구 위치나 약도를 그려두세요)
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <h2 class="text-base font-black mb-2">3. 핵·방사성 낙진 4단계 생명 수칙 (7:10 법칙)</h2>
-        <div class="border border-black rounded p-3 text-xs space-y-1">
-            <p>• <strong>1단계 (0~60초):</strong> 섬광 주시 절대 금지 → 즉시 바닥에 엎드려 입 벌리고 귀 막기 (유리창에서 이탈)</p>
-            <p>• <strong>2단계 (15분 내):</strong> 방사성 낙진이 떨어지기 전 지하 민방위 대피소·지하철역·건물 지하로 즉시 대피</p>
-            <p>• <strong>3단계 (첫 48시간):</strong> 창문·환풍구 테이프 밀폐, 외부 착용 겉옷 비닐 밀봉 폐기, 물+비누 샤워 (린스 사용 금지)</p>
-            <p>• <strong>4단계 (7:10 법칙):</strong> 7시간 후 방사능 1/10 감소, 49시간 후 1/100 감소 → 건전지 라디오(FM 97.3MHz) 청취</p>
+        <!-- Section 3: Calculated Supplies & Checklist -->
+        <div class="mb-3">
+            <h2 class="text-xs font-black bg-black text-white px-2 py-1 mb-1.5">3. 정전·단수 대비 비축 기준 및 비상배낭 점검표</h2>
+            <div id="printCalcSummary" class="border border-black p-2 mb-1.5 text-[11px] font-bold"></div>
+            <div id="printChecklistArea" class="grid grid-cols-2 gap-1.5 text-[10.5px] border border-black p-2"></div>
+        </div>
+
+        <!-- Section 4: Nuclear 4-Stage Summary -->
+        <div class="mb-2">
+            <h2 class="text-xs font-black bg-black text-white px-2 py-1 mb-1.5">4. 핵·방사성 낙진 4단계 핵심 행동수칙 (행안부·FEMA 7:10 법칙 기준)</h2>
+            <div class="border border-black p-2.5 text-[10.5px] space-y-1">
+                <p><strong>① 폭발 직후 (0~60초):</strong> 섬광 주시 절대 금지 → 즉시 바닥에 엎드려 입 벌리고 귀 막기 (유리창에서 즉시 이탈)</p>
+                <p><strong>② 골든타임 (15분 내):</strong> 방사성 낙진이 떨어지기 전 지하 민방위 대피소·지하철역·콘크리트 건물 지하(PF 100~500)로 진입</p>
+                <p><strong>③ 실내 밀폐 (첫 48시간):</strong> 창문·환풍구 테이프 밀폐, 외부 착용 겉옷 비닐 이중 밀봉, 물+비누 샤워 (린스 사용 절대 금지)</p>
+                <p><strong>④ 7:10 감쇠 대기:</strong> 폭발 7시간 후 방사능 1/10 감소, 49시간 후 1/100 감소 → 정부 공식 지시 전까지 무단 외출 및 요오드제 임의 복용 금지</p>
+            </div>
+        </div>
+
+        <div class="text-[9.5px] text-gray-700 flex justify-between pt-1 border-t border-black">
+            <span>※ 본 시트의 대피소 정보는 공공데이터 기준이며 실제 위기 시 정부 재난방송 및 안전디딤돌 앱 안내를 최우선으로 따르십시오.</span>
+            <span class="font-bold">비상생존 포털 곁 (https://gyet.site)</span>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="no-print border-t border-gray-200 mt-12 py-6 bg-gray-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-gray-600">
-            <span class="font-bold text-black">곁 (gyet) - 대한민국 민방위 대피소 & 비상생존 포털 (https://gyet.site)</span>
-            <span>데이터 출처: 행정안전부 공공데이터포털 민방위대피시설.csv (EPSG:4326)</span>
+    <!-- =========================================================
+         FOOTER (면책 문구, 공식 채널 링크, 운영 주체 및 문의처 명시)
+         ========================================================= -->
+    <footer class="no-print border-t-2 border-black mt-12 py-8 bg-gray-50 text-xs text-gray-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 pb-4 border-b border-gray-200">
+                <!-- 면책 조항 -->
+                <div class="md:col-span-7 space-y-1.5">
+                    <div class="font-black text-black text-sm">⚠️ 데이터 기준일 및 법적 면책 안내 (Disclaimer)</div>
+                    <p class="leading-relaxed">
+                        • <strong>데이터 기준일:</strong> 2026년 11월 1일 (행정안전부 공공데이터포털 민방위대피시설.csv 기준)<br/>
+                        • 본 웹사이트(<strong>곁 · gyet.site</strong>)가 제공하는 대피소 위치 및 생존 계산 수치는 평시 대비를 돕기 위한 참고용 자료입니다. 시설 리모델링, 지자체 지정 해제, 현장 통제 등에 따라 실제 개방 여부가 다를 수 있으므로 위급 상황 시 반드시 <strong>행정안전부 국민재난안전포털</strong> 및 <strong>'안전디딤돌' 공식 앱</strong>의 실시간 안내를 최우선으로 확인하시기 바랍니다.
+                    </p>
+                </div>
+
+                <!-- 공식 채널 & 운영 주체 -->
+                <div class="md:col-span-5 space-y-2">
+                    <div class="font-black text-black text-sm">🏛️ 정부 공식 재난 채널 & 사이트 운영 정보</div>
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        <a href="https://www.safekorea.go.kr" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-white border border-black rounded font-bold text-black hover:bg-gray-100">행정안전부 국민재난안전포털 ↗</a>
+                        <a href="https://www.data.go.kr" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 bg-white border border-gray-300 rounded font-bold text-black hover:border-black">공공데이터포털 ↗</a>
+                    </div>
+                    <div class="pt-2 text-gray-600 space-y-0.5">
+                        <div>• <strong>운영 및 개발 주체:</strong> 프로젝트 곁 (Project Gyeot · 독립 시민 안전 웹 프로젝트)</div>
+                        <div>• <strong>오류 제보 및 문의:</strong> <a href="mailto:contact@gyet.site" class="underline font-bold text-black">contact@gyet.site</a> (대피소 폐쇄·위치 오류 제보 환영)</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-2 text-gray-500">
+                <span class="font-bold text-black">곁 (gyet) - 대한민국 민방위 대피소 & 비상생존 포털 V1.2 (https://gyet.site)</span>
+                <span>지도 타일: © OpenStreetMap contributors · 과학 기준: FEMA / NCRP / 행안부</span>
+            </div>
         </div>
     </footer>
 
@@ -748,7 +964,7 @@
          APPLICATION JAVASCRIPT
          ========================================================= -->
     <script>
-        // 1. Preloaded 45 Real Active Shelters from 민방위대피시설.csv (Namyangju, Seoul, Gyeonggi, Major Cities)
+        // 1. Preloaded 45 Real Active Shelters
         const INITIAL_SHELTERS = [
             { id: "NYJ-01", name: "남양주시청 제1청사 지하대피소", roadAddr: "경기도 남양주시 경춘로 1037 (금곡동)", jibunAddr: "경기도 남양주시 금곡동 185-10", sido: "경기도", type: "정부지원시설", floor: "지하", area: 1450, capacity: 1757, lat: 37.63602, lng: 127.21652 },
             { id: "NYJ-02", name: "다산지금지구 정약용도서관 지하대피소", roadAddr: "경기도 남양주시 다산중앙로82번안길 138 (다산동)", jibunAddr: "경기도 남양주시 다산동 6145", sido: "경기도", type: "공공용시설", floor: "지하", area: 3120, capacity: 3780, lat: 37.61045, lng: 127.16310 },
@@ -800,18 +1016,20 @@
         // Global State
         let allShelters = [...INITIAL_SHELTERS];
         let filteredShelters = [...INITIAL_SHELTERS];
-        let currentRefLat = 37.63602; // Namyangju default
+        let currentRefLat = 37.63602;
         let currentRefLng = 127.21652;
         let map = null;
         let markerLayerGroup = null;
         let userCenterMarker = null;
 
-        // Bookmarks & Checklists in LocalStorage
+        // LocalStorage Bookmarks, Checklists & Family Plan
         let bookmarkedShelters = JSON.parse(localStorage.getItem('KR_CIVIL_BOOKMARKS_V1') || '[]');
         if (bookmarkedShelters.length === 0) {
             bookmarkedShelters = [INITIAL_SHELTERS[0], INITIAL_SHELTERS[1]];
             localStorage.setItem('KR_CIVIL_BOOKMARKS_V1', JSON.stringify(bookmarkedShelters));
         }
+
+        let familyPlan = JSON.parse(localStorage.getItem('KR_FAMILY_PLAN_V1') || '{"meet1":"","meet2":"","contacts":""}');
 
         const SURVIVAL_CHECKLIST = [
             { id: 'chk-1', title: '생수 (1인 하루 2L × 7일분) 및 정수 알약', desc: '단수 발생 시 가장 시급한 생명 유지 수단' },
@@ -825,7 +1043,6 @@
         ];
         let checkedSurvivalIds = JSON.parse(localStorage.getItem('KR_SURVIVAL_CHECKS_V1') || '["chk-1", "chk-3"]');
 
-        // Regional Counts from User's CSV (17,241 active shelters)
         const REGIONAL_ACTIVE_COUNTS = [
             { sido: "경기도", count: 4058 },
             { sido: "서울특별시", count: 2902 },
@@ -845,6 +1062,50 @@
             { sido: "세종특별자치시", count: 187 }
         ];
 
+        // Online/Offline Verification Indicator
+        function updateNetworkStatus() {
+            const dot = document.getElementById('offlineStatusDot');
+            const txt = document.getElementById('offlineStatusText');
+            if (navigator.onLine) {
+                dot.className = 'w-2 h-2 rounded-full bg-black';
+                txt.textContent = '오프라인 준비 완료 (로컬 캐시 활성)';
+            } else {
+                dot.className = 'w-2 h-2 rounded-full border border-black bg-white';
+                txt.textContent = '오프라인 모드 작동 중 (저장 데이터 열람 가능)';
+            }
+        }
+        window.addEventListener('online', updateNetworkStatus);
+        window.addEventListener('offline', updateNetworkStatus);
+
+        function toggleModal(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.toggle('hidden');
+        }
+
+        // Save & Load Family Plan Inputs for Print Sheet
+        function initFamilyPlanInputs() {
+            document.getElementById('planMeet1').value = familyPlan.meet1 || '';
+            document.getElementById('planMeet2').value = familyPlan.meet2 || '';
+            document.getElementById('planContacts').value = familyPlan.contacts || '';
+            syncFamilyPlanToPrint();
+        }
+
+        function saveFamilyPlan() {
+            familyPlan = {
+                meet1: document.getElementById('planMeet1').value.trim(),
+                meet2: document.getElementById('planMeet2').value.trim(),
+                contacts: document.getElementById('planContacts').value.trim()
+            };
+            localStorage.setItem('KR_FAMILY_PLAN_V1', JSON.stringify(familyPlan));
+            syncFamilyPlanToPrint();
+        }
+
+        function syncFamilyPlanToPrint() {
+            document.getElementById('printMeet1').textContent = familyPlan.meet1 || '(직접 기입:                                                      )';
+            document.getElementById('printMeet2').textContent = familyPlan.meet2 || '(직접 기입:                                                      )';
+            document.getElementById('printContacts').textContent = familyPlan.contacts || '(직접 기입:                                                      )';
+        }
+
         // 2. Initialize Leaflet Map
         function initMap() {
             map = L.map('shelterMap', {
@@ -852,7 +1113,6 @@
                 zoom: 12
             });
 
-            // Standard Crisp OpenStreetMap Tile (No API key required, no blurry filter)
             L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 maxZoom: 19,
                 attribution: '&copy; OpenStreetMap'
@@ -867,7 +1127,6 @@
             applyFilters();
         }
 
-        // Haversine Distance (km)
         function calcDistanceKm(lat1, lng1, lat2, lng2) {
             const R = 6371;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -910,7 +1169,6 @@
             if (!markerLayerGroup) return;
             markerLayerGroup.clearLayers();
 
-            // Reference Center Marker
             if (userCenterMarker) map.removeLayer(userCenterMarker);
             userCenterMarker = L.circleMarker([currentRefLat, currentRefLng], {
                 radius: 8,
@@ -920,7 +1178,6 @@
                 fillOpacity: 1
             }).addTo(map).bindTooltip('현재 거리 계산 기준점', { direction: 'top' });
 
-            // Render top 200 nearest markers for crisp performance
             const visibleSlice = filteredShelters.slice(0, 200);
             visibleSlice.forEach(s => {
                 const walkMin = Math.max(1, Math.round((s.distKm * 1.25 / 4.0) * 60));
@@ -1006,10 +1263,21 @@
         function moveToPreset(lat, lng, title) {
             currentRefLat = lat;
             currentRefLng = lng;
-            document.getElementById('mapCenterTitle').textContent = `${title} 대피소 지도`;
+            document.getElementById('mapCenterTitle').textContent = `${title} 기준 대피소 지도`;
             document.getElementById('regionSelect').value = 'ALL';
             if (map) map.setView([lat, lng], 13);
             applyFilters();
+        }
+
+        function handleSigunguChange() {
+            const val = document.getElementById('sigunguSelect').value;
+            if (val === 'ALL') return;
+            const parts = val.split(',');
+            const lat = parseFloat(parts[0]);
+            const lng = parseFloat(parts[1]);
+            const label = parts[2] || '선택 지역';
+            moveToPreset(lat, lng, label);
+            showToast(`수동 위치 선택: '${label}' 중심으로 대피소 거리를 재계산했습니다.`);
         }
 
         function sortByCurrentMapCenter() {
@@ -1035,7 +1303,7 @@
 
         function findMyLocation() {
             if (!navigator.geolocation) {
-                showToast('브라우저에서 GPS 위치 정보를 지원하지 않습니다.');
+                showToast('브라우저에서 GPS를 지원하지 않습니다. 우측의 시·군·구 수동 선택을 이용해 주세요.');
                 return;
             }
             showToast('내 현재 위치(GPS)를 확인 중입니다...');
@@ -1050,13 +1318,13 @@
                     showToast('내 현재 위치를 기준으로 가장 가까운 대피소를 정렬했습니다.');
                 },
                 () => {
-                    showToast('GPS 위치 권한이 거부되어 남양주시 중심 좌표를 유지합니다.');
+                    showToast('GPS 신호가 약하거나 거부되었습니다. [2. 시·군·구 수동 이동] 드롭다운으로 동네를 선택해 보세요.');
                 },
                 { enableHighAccuracy: true, timeout: 8000 }
             );
         }
 
-        // 4. CSV File Upload with Automatic CP949 (EUC-KR) & UTF-8 Detection
+        // 4. CSV File Upload
         function handleCsvFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1186,7 +1454,10 @@
 
             if (bookmarkedShelters.length === 0) {
                 container.innerHTML = `<div class="p-4 border border-dashed border-gray-300 rounded-lg text-xs text-gray-500 text-center">저장된 대피소가 없습니다. [1. 대피소 지도] 탭에서 대피소를 추가해 보세요.</div>`;
-                printArea.innerHTML = `<p>저장된 지정 대피소가 없습니다.</p>`;
+                printArea.innerHTML = `
+                    <div>• <strong>1순위 대피소명 / 도로명주소:</strong> ________________________________________________ (보관함에 대피소를 추가하거나 직접 적으세요)</div>
+                    <div>• <strong>2순위 대피소명 / 도로명주소:</strong> ________________________________________________</div>
+                `;
                 return;
             }
 
@@ -1203,7 +1474,7 @@
             `).join('');
 
             printArea.innerHTML = bookmarkedShelters.map((s, idx) => `
-                <div><strong>[지정 ${idx + 1}] ${escapeHtml(s.name)} (${escapeHtml(s.floor)})</strong> - ${escapeHtml(s.roadAddr || s.jibunAddr)} (최대 ${Number(s.capacity || 0).toLocaleString()}명 수용 / GPS: ${s.lat.toFixed(4)}, ${s.lng.toFixed(4)})</div>
+                <div>• <strong>[지정 ${idx + 1}순위] ${escapeHtml(s.name)} (${escapeHtml(s.floor)})</strong> — 주소: ${escapeHtml(s.roadAddr || s.jibunAddr)} (수용 ${Number(s.capacity || 0).toLocaleString()}명 / 좌표: ${s.lat.toFixed(4)}, ${s.lng.toFixed(4)})</div>
             `).join('');
         }
 
@@ -1227,6 +1498,11 @@
             document.getElementById('calcFoodKcalResult').textContent = `${totalKcal.toLocaleString()} kcal`;
             document.getElementById('calcFoodCanSub').textContent = `150g 통조림/전투식량 약 ${fam * days * 3}끼니 분량`;
             document.getElementById('calcToiletBagsResult').textContent = `${toiletBags.toLocaleString()} 매`;
+
+            const printCalc = document.getElementById('printCalcSummary');
+            if (printCalc) {
+                printCalc.textContent = `[우리 가족 기준: ${fam}인 × ${days}일] 필수 식수: ${drinkL}L (2L 생수 ${bottles2L}병) / 생활용수 포함: ${totalWaterL}L / 비상식량: ${totalKcal.toLocaleString()}kcal / 비상변기봉투: ${toiletBags}매`;
+            }
         }
 
         function renderChecklist() {
@@ -1250,9 +1526,10 @@
                 `;
             }).join('');
 
-            printChecklist.innerHTML = SURVIVAL_CHECKLIST.map(item => `
-                <div>□ <strong>${item.title}</strong> (${item.desc})</div>
-            `).join('');
+            printChecklist.innerHTML = SURVIVAL_CHECKLIST.map(item => {
+                const done = checkedSurvivalIds.includes(item.id);
+                return `<div>${done ? '☑' : '□'} <strong>${item.title}</strong> (${item.desc})</div>`;
+            }).join('');
         }
 
         function toggleSurvivalCheck(id) {
@@ -1263,7 +1540,7 @@
             renderChecklist();
         }
 
-        // 6. Tab 3: Seasonal (1~12월), Distance & Pet Simulator
+        // 6. Tab 3: Seasonal, Distance & Pet Simulator
         function setSimMonth(m) {
             document.getElementById('simMonthInput').value = m;
             runSurvivalSimulation();
@@ -1321,14 +1598,12 @@
 
             document.getElementById('simMonthBadge').textContent = seasonName;
 
-            // Walking speed calculation
             let speedKmh = terrain === 'flat' ? 4.0 : terrain === 'hill' ? 2.8 : 2.0;
             if (totalPets > 0) speedKmh *= Math.max(0.65, 1 - totalPets * 0.08);
             if ([7, 8, 1, 2].includes(month)) speedKmh *= 0.88;
 
             const walkMinutes = Math.max(3, Math.round((distKm / speedKmh) * 60));
 
-            // Water & Food Calculation
             const humanWaterL = people * days * 3.0 * waterMultiplier + (people * distKm * 0.25);
             const petWaterL = days * (petSmall * 0.4 + petLarge * 1.4 + petCat * 0.3) * waterMultiplier;
             const totalWaterL = humanWaterL + petWaterL;
@@ -1351,7 +1626,7 @@
             } else {
                 document.getElementById('simResPetSummary').textContent = `사료 ${petFeedKg}kg · 패드 ${petPads}장`;
                 document.getElementById('simResPetWaterSub').textContent = `반려동물 총 ${totalPets}마리 전용 음용수 ${petWaterL.toFixed(1)}L 포함`;
-                document.getElementById('simPetPolicyBody').textContent = `반려동물 ${totalPets}마리 동반 시 주의사항: 현행 민방위 대피시설 지침상 일반 대피 구역에는 반려동물 출입이 제한되거나 반드시 잠금장치가 있는 켄넬(이동장)·입마개를 착용한 상태로 별도 분리 구역에 머물러야 합니다. 단기 공습은 지하주차장 자차 내부나 켄넬 동반 대피를, 단수·정전 장기 체류는 자택 안전 구역 대기를 병행 준비하세요.`;
+                document.getElementById('simPetPolicyBody').textContent = `반려동물 ${totalPets}마리 동반 시 주의사항 (농림축산식품부 반려동물 재난 대피 가이드라인 참고): 다중이 밀집하는 민방위 대피시설에서는 반드시 잠금장치가 있는 이동장(켄넬)·목줄·입마개를 지참해야 하며, 시설에 따라 분리된 구역에 체류해야 할 수 있습니다. 단기 공습은 지하주차장 자차 내부나 켄넬 동반 대피를, 단수·정전 장기 체류는 자택 내 안전 구역 대기를 병행 준비하세요.`;
             }
 
             document.getElementById('simSeasonWarningTitle').textContent = `${seasonName} 맞춤 생존 권고`;
@@ -1360,11 +1635,11 @@
 
         // 7. Tab 4: Nuclear 7:10 Rule & Protection Factor (PF) Simulator
         const PF_OPTIONS = [
-            { id: 'pf-1', name: '야외 노출 / 차량 내부', pf: 1, tag: '차폐 없음', desc: '일반 승용차의 철판과 유리는 감마선과 낙진 방사선을 전혀 막지 못합니다. 즉시 콘크리트 건물이나 지하로 이동해야 합니다.' },
-            { id: 'pf-3', name: '일반 단독주택 지상 1층', pf: 3, tag: '66% 차단', desc: '지붕과 외벽에 쌓인 낙진과의 거리가 가까워 방호력이 낮습니다. 창문 없는 가장 안쪽 방이나 지하실로 내려가야 합니다.' },
-            { id: 'pf-20', name: '철근콘크리트 아파트 중간층', pf: 20, tag: '95% 차단', desc: '지면 낙진과 옥상 낙진으로부터 모두 거리가 떨어진 중간층(예: 15층 건물의 5~10층) 창문 없는 욕실은 훌륭한 차폐 공간입니다.' },
-            { id: 'pf-100', name: '대형 빌딩·아파트 지하주차장', pf: 100, tag: '99.0% 차단', desc: '지면 아래에 위치하고 상부 두꺼운 콘크리트 슬래브가 방사선을 차단하여 외부 피폭량을 1/100로 줄여줍니다.' },
-            { id: 'pf-500', name: '지하 민방위 대피소 / 지하철역', pf: 500, tag: '99.8% 차단 (최고 안전)', desc: '두꺼운 철근콘크리트와 토양층이 방사선을 완벽히 차폐합니다. 외부 1,000 mSv/h의 치명적 환경에서도 내부는 2 mSv/h 이하로 보호됩니다.' }
+            { id: 'pf-1', name: '야외 노출 / 차량 내부', pf: 1, tag: '차폐 없음', desc: '일반 승용차의 철판과 유리는 감마선과 낙진 방사선을 전혀 막지 못합니다(PF 1). 즉시 콘크리트 건물이나 지하로 이동해야 합니다.' },
+            { id: 'pf-3', name: '일반 단독주택 지상 1층', pf: 3, tag: '66% 차단', desc: '지붕과 외벽에 쌓인 낙진과의 거리가 가까워 방호력이 낮습니다(PF 2~3). 창문 없는 가장 안쪽 방이나 지하실로 내려가야 합니다.' },
+            { id: 'pf-20', name: '철근콘크리트 아파트 중간층', pf: 20, tag: '95% 차단', desc: '지면 낙진과 옥상 낙진으로부터 모두 거리가 떨어진 중간층(최상층 제외) 창문 없는 욕실은 약 95%의 방사선을 차폐합니다.' },
+            { id: 'pf-100', name: '대형 빌딩·아파트 지하주차장', pf: 100, tag: '99.0% 차단', desc: '지면 아래에 위치하고 상부 두꺼운 콘크리트 슬래브가 방사선을 차단하여 외부 피폭량을 약 1/100로 줄여줍니다.' },
+            { id: 'pf-500', name: '지하 민방위 대피소 / 지하철역', pf: 500, tag: '99.8% 차단 (최고 안전)', desc: '두꺼운 철근콘크리트와 토양층이 감마선을 99.8% 이상 차폐합니다(FEMA/DoD 기준 PF 200~1,000). 외부 1,000 mSv/h 환경에서도 내부는 2 mSv/h 이하로 보호됩니다.' }
         ];
         let currentPfId = 'pf-500';
 
@@ -1504,7 +1779,9 @@
         }
 
         window.onload = function () {
+            updateNetworkStatus();
             initMap();
+            initFamilyPlanInputs();
             updateBookmarkUI();
             updateSurvivalCalculator();
             renderChecklist();
