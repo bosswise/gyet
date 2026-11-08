@@ -1,8 +1,10 @@
 {
+  "id": "/",
   "name": "곁 - 대한민국 민방위 대피소 & 비상생존 포털",
   "short_name": "곁 (gyet)",
   "description": "전국 17,241개 민방위 대피소 지도 검색 및 7일 생존 배낭 계산기, 오프라인 생존 매뉴얼",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
@@ -10,19 +12,19 @@
   "lang": "ko",
   "icons": [
     {
-      "src": "/icon-192.png",
+      "src": "https://wsrv.nl/?url=https://gyet.site/icon.png&w=192&h=192&output=png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "https://wsrv.nl/?url=https://gyet.site/icon.png&w=512&h=512&output=png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/icon-512.png",
+      "src": "https://wsrv.nl/?url=https://gyet.site/icon.png&w=512&h=512&output=png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
